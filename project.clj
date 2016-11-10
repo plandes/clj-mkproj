@@ -5,8 +5,7 @@
             :url "https://www.apache.org/licenses/LICENSE-2.0"
             :distribution :repo}
   :plugins [[lein-codox "0.9.5"]
-            ;[org.clojars.cvillecsteele/lein-git-version "1.0.3"]
-            ]
+            [org.clojars.cvillecsteele/lein-git-version "1.0.3"]]
   :codox {:metadata {:doc/format :markdown}
           :project {:name "Template project"}
           :output-path "target/doc/codox"}

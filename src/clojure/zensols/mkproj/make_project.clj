@@ -1,13 +1,19 @@
 (ns zensols.mkproj.make-project
   (:require [clojure.java.io :as io]
+            [clojure.string :as s]
             [clojure.tools.logging :as log]
+            [clojure.set :refer [rename-keys]]
             [clj-yaml.core :as yaml])
-  (:require [zensols.mkproj.velocity :as v]
+  (:require [zensols.actioncli.log4j2 :as lu]
+            [zensols.mkproj.velocity :as v]
             [zensols.mkproj.config :as c]))
 
 (def ^{:dynamic true :private true}
   *generate-config*
   "Top level template configuration")
+
+(def ^:private default-config-file
+  (io/file (System/getProperty "user.home") ".mkproj"))
 
 (defn- write-template-reader [reader name dst-file]
   (let [{:keys [template-context]} *generate-config*]
@@ -115,8 +121,64 @@
   (fn [key def]
     (get map key)))
 
-(->> (create-mapped-override-fn {:project "clj-nlp-parse"
-                                 :package "zensols.nlparse"
-                                 :sub-group "com.zensols.nlp"
-                                 :template-directory "/d/exproj"})
-     (make-project (io/file "/Users/plandes/view/template/lein/zen-lein")))
+(when false
+  (->> (create-mapped-override-fn {:project "clj-nlp-parse"
+                                   :package "zensols.nlparse"
+                                   :sub-group "com.zensols.nlp"
+                                   :template-directory "/d/exproj"})
+      (make-project (io/file "/Users/plandes/view/template/lein/zen-lein"))))
+
+(defn- make-from-properties [config-file opts]
+  (log/infof "reading config file: %s" config-file)
+  (let [props (merge (if (.exists config-file)
+                       (c/load-props config-file))
+                     opts)]
+    (println props)))
+
+(defn- params-to-map [str]
+  (when str
+   (->> (#(s/split str #","))
+        (map #(->> % (re-find #"^(.+?):(.+)$") rest (apply hash-map)))
+        (apply merge))))
+
+(defn- validate-opts [{:keys [template param] :as opts}]
+  (if (nil? template)
+    (println (format "Missing template directory -t option"))
+    (-> opts
+        (rename-keys {:template :template-directory})
+        (merge (params-to-map param)))))
+
+(def describe-command
+  "CLI command to invoke a parameter list"
+  {:description "list all project configuration parameters"
+   :options
+   [["-t" "--template" (format "the template directory (contains the %s file)"
+                               (c/project-file-yaml))
+     :required "FILENAME"
+     :validate [#(and % (.isDirectory %)) "Not a directory"]
+     :parse-fn io/file]]
+   :app (fn [{:keys [template] :as opts} & args]
+          (validate-opts opts)
+          (c/print-help template))})
+
+(def make-command
+  "CLI command to invoke a template rollout of a project"
+  {:description "generate a template rollout of a project"
+   :options
+   [(lu/log-level-set-option)
+    ["-c" "--config" "location of the configuration file"
+     :required "FILENAME"
+     :default default-config-file
+     :parse-fn io/file]
+    ["-t" "--template" (format "the template directory (contains the %s file)"
+                               (c/project-file-yaml))
+     :required "FILENAME"
+     :validate [#(and % (.isDirectory %)) "Not a directory"]
+     :parse-fn io/file]
+    ["-p" "--param" "list of project parameters (ie package:zensols.nlp,project:clj-nl-parse), see describe command"
+     :required "PARAMETERS"]]
+   :app (fn [{:keys [config] :as opts} & args]
+          (let [opts (validate-opts opts)]
+            (clojure.pprint/pprint opts)
+                                        ;(make-from-properties config opts)
+            ))})

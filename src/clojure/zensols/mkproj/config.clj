@@ -1,4 +1,5 @@
 (ns zensols.mkproj.config
+  (:import [java.util Properties])
   (:require [clojure.java.io :as io]
             [clojure.tools.logging :as log]
             [clj-yaml.core :as yaml])
@@ -19,6 +20,13 @@
            (:default def)
            (:example def))])
 
+(defn project-config
+  [src-dir]
+  (with-open [reader (->> (project-file-yaml)
+                          (io/file src-dir)
+                          io/reader)]
+    (->> reader slurp yaml/parse-string)))
+
 (defn project-environment
   ([src-dir]
    (project-environment src-dir (constantly nil)))
@@ -26,23 +34,20 @@
    (letfn [(zip-opts [key-fn ctx]
              (zipmap (map #(-> % first key-fn) ctx)
                      (map second ctx)))]
-     (with-open [reader (->> (project-file-yaml)
-                             (io/file src-dir)
-                             io/reader)]
-       (let [proj (->> reader slurp yaml/parse-string :project)
-             top-level-mod (->> [:template-directory]
-                                (map #(option-default % override-fn (get proj %)))
-                                (zip-opts identity))
-             top-level-vert [:generate]]
-         (->> (:context proj)
-              (map (fn [[k def]]
-                     (option-default k override-fn def)))
-              (zip-opts name)
-              (hash-map :context)
-              (merge (->> top-level-vert
-                          (map #(hash-map % (get proj %)))
-                          (apply merge))
-                     top-level-mod)))))))
+     (let [proj (->> (project-config src-dir) :project)
+           top-level-mod (->> [:template-directory]
+                              (map #(option-default % override-fn (get proj %)))
+                              (zip-opts identity))
+           top-level-vert [:generate]]
+       (->> (:context proj)
+            (map (fn [[k def]]
+                   (option-default k override-fn def)))
+            (zip-opts name)
+            (hash-map :context)
+            (merge (->> top-level-vert
+                        (map #(hash-map % (get proj %)))
+                        (apply merge))
+                   top-level-mod))))))
 
 (defn- create-config-template [template-context config-file]
   (->> (v/create-template-from-file config-file)
@@ -54,3 +59,21 @@
     (when (.exists dir-conf-file)
       (->> (create-config-template template-context dir-conf-file)
            :package :generate (map :directory-map)))))
+
+(defn load-props
+  [file-name]
+  (with-open [reader (io/reader file-name)] 
+    (let [props (java.util.Properties.)]
+      (.load props reader)
+      (into {} (for [[k v] props] [(keyword k) (read-string v)])))))
+
+(defn print-help [src-dir]
+  (->> (project-config src-dir)
+       :project :context
+       (map (fn [[op {:keys [description example default]}]]
+                                        ;def
+              (println (format "%s: %s (eg %s)%s"
+                               (name op) description example
+                               (if default
+                                 (format ", default: <%s>" default)
+                                 "")))))))
