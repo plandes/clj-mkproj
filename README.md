@@ -28,7 +28,7 @@ project template included in this repo.
 
 #### Command line help
 
-Get the command line usage by supplying no arguments
+Get the command line usage by supplying no arguments:
 ```sql
 $ mkproj
 describe	list all project configuration parameters
