@@ -60,13 +60,6 @@
       (->> (create-config-template template-context dir-conf-file)
            :package :generate (map :directory-map)))))
 
-(defn load-props
-  [file-name]
-  (with-open [reader (io/reader file-name)] 
-    (let [props (java.util.Properties.)]
-      (.load props reader)
-      (into {} (for [[k v] props] [(keyword k) v])))))
-
 (defn print-help [src-dir]
   (->> (project-config src-dir)
        :project :context
