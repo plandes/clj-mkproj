@@ -26,5 +26,6 @@
     (apply cli/process-arguments command-context args)))
 
 ;(-main)
-(-main "make" "-t" "/Users/landes/view/template/lein" "-p" "package:zensols.nlp,project:clj-nl-parse")
-;(-main "describe" "-t" "/Users/landes/view/template/lein")
+;(-main "describe" "-s" "/Users/landes/view/template/lein")
+(-main "make" "-s" "/Users/landes/view/template/lein" "-p" "package:zensols.nlp,project:clj-nl-parse")
+;(-main "describe" "-s" "/Users/landes/view/template/lein")

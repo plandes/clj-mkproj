@@ -67,10 +67,10 @@
   (->> src-files
        (map (fn [src-file]
               (let [dst-file (io/file dst-dir (.getName src-file))]
-               (cond (.isFile src-file)
-                     (process-file src-file dst-file)
-                     (.isDirectory src-file)
-                     (process-directory src-file dst-file)))))
+                (cond (.isFile src-file)
+                      (process-file src-file dst-file)
+                      (.isDirectory src-file)
+                      (process-directory src-file dst-file)))))
        doall))
 
 (defn- process-directory [src-dir dst-dir]
@@ -103,82 +103,98 @@
          doall)))
 
 (defn- make-project [src-dir override-fn]
+  (log/infof "making project from %s" src-dir)
   (let [env (c/project-environment src-dir override-fn)
         {template-directory :template-directory
          template-context :context} env
-        {project-name "project-name"} template-context
+        {project "project"} template-context
         dst-dir (io/file template-directory)
         dst-project-file (io/file dst-dir (c/project-file-yaml))]
-    (log/infof "creating new project %s in %s" project-name dst-dir)
+    (assert project)
+    (clojure.pprint/pprint env)
+    (log/infof "creating new project %s -> %s" project dst-dir)
     (.mkdirs dst-dir)
     (binding [*generate-config* (merge (dissoc env :template-context)
                                        {:template-context template-context})]
       (let [cfg {:project env}]
         (write-project-config cfg dst-dir))
-      (process-directory (io/file src-dir c/project-file-name) dst-dir))))
+      (process-directory (io/file src-dir c/project-file-name) dst-dir))
+    ))
+
+(let [dir (io/file "/Users/landes/view/template/lein")]
+  (->> (create-mapped-override-fn {:project "clj-nlp-parse"
+                                   :package "zensols.nlparse"
+                                   :sub-group "com.zensols.nlp"
+                                   :template-directory "/d/exproj"})
+                                        ;(c/project-environment dir) clojure.pprint/pprint
+       ;(make-project dir)
+       ))
 
 (defn- create-mapped-override-fn [map]
   (fn [key def]
     (get map key)))
 
-(when false
-  (->> (create-mapped-override-fn {:project "clj-nlp-parse"
-                                   :package "zensols.nlparse"
-                                   :sub-group "com.zensols.nlp"
-                                   :template-directory "/d/exproj"})
-      (make-project (io/file "/Users/plandes/view/template/lein/zen-lein"))))
-
-(defn- make-from-properties [config-file opts]
+(defn- make-from-properties [config-file src-dir opts]
   (log/infof "reading config file: %s" config-file)
-  (let [props (merge (if (.exists config-file)
-                       (c/load-props config-file))
-                     opts)]
-    (println props)))
+  (let [props (->> opts
+                   (merge (if (.exists config-file)
+                            (c/load-props config-file))))]
+    (->> (create-mapped-override-fn props)
+         (make-project src-dir))))
 
 (defn- params-to-map [str]
   (when str
-   (->> (#(s/split str #","))
-        (map #(->> % (re-find #"^(.+?):(.+)$") rest (apply hash-map)))
-        (apply merge))))
+    (->> (#(s/split str #","))
+         (map #(->> % (re-find #"^(.+?):(.+)$") rest (apply hash-map)))
+         (apply merge))))
 
-(defn- validate-opts [{:keys [template param] :as opts}]
-  (if (nil? template)
-    (println (format "Missing template directory -t option"))
+(defn- validate-opts [{:keys [source param] :as opts}]
+  (if (nil? source)
+    (throw (ex-info (format "Missing source directory -s option")
+                    {:option "-s"}))
     (-> opts
-        (rename-keys {:template :template-directory})
+        (dissoc :level :config :source :param)
         (merge (params-to-map param)))))
 
 (def describe-command
   "CLI command to invoke a parameter list"
   {:description "list all project configuration parameters"
    :options
-   [["-t" "--template" (format "the template directory (contains the %s file)"
-                               (c/project-file-yaml))
+   [["-s" "--source" (format "the source directory containing the %s file"
+                             (c/project-file-yaml))
      :required "FILENAME"
      :validate [#(and % (.isDirectory %)) "Not a directory"]
      :parse-fn io/file]]
    :app (fn [{:keys [template] :as opts} & args]
-          (validate-opts opts)
-          (c/print-help template))})
+          (try
+            (validate-opts opts)
+            (c/print-help template)
+            (catch java.io.FileNotFoundException e
+              (binding [*out* *err*]
+                (println (.getMessage e))))
+            (catch Exception e
+              (binding [*out* *err*]
+                (println (if ex-data
+                           (.getMessage e)
+                           (.toString e)))))))})
 
 (def make-command
   "CLI command to invoke a template rollout of a project"
   {:description "generate a template rollout of a project"
    :options
    [(lu/log-level-set-option)
+    ["-s" "--source" (format "the source directory containing the %s file"
+                             (c/project-file-yaml))
+     :required "FILENAME"
+     :validate [#(and % (.isDirectory %)) "Not a directory"]
+     :parse-fn io/file]
     ["-c" "--config" "location of the configuration file"
      :required "FILENAME"
      :default default-config-file
      :parse-fn io/file]
-    ["-t" "--template" (format "the template directory (contains the %s file)"
-                               (c/project-file-yaml))
-     :required "FILENAME"
-     :validate [#(and % (.isDirectory %)) "Not a directory"]
-     :parse-fn io/file]
     ["-p" "--param" "list of project parameters (ie package:zensols.nlp,project:clj-nl-parse), see describe command"
      :required "PARAMETERS"]]
-   :app (fn [{:keys [config] :as opts} & args]
+   :app (fn [{:keys [config source] :as opts} & args]
           (let [opts (validate-opts opts)]
-            (clojure.pprint/pprint opts)
-                                        ;(make-from-properties config opts)
+            (make-from-properties config source opts)
             ))})

@@ -65,13 +65,12 @@
   (with-open [reader (io/reader file-name)] 
     (let [props (java.util.Properties.)]
       (.load props reader)
-      (into {} (for [[k v] props] [(keyword k) (read-string v)])))))
+      (into {} (for [[k v] props] [(keyword k) v])))))
 
 (defn print-help [src-dir]
   (->> (project-config src-dir)
        :project :context
        (map (fn [[op {:keys [description example default]}]]
-                                        ;def
               (println (format "%s: %s (eg %s)%s"
                                (name op) description example
                                (if default
