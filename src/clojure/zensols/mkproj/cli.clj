@@ -30,17 +30,6 @@
          (map #(->> % (re-find #"^(.+?):(.+)$") rest (apply hash-map)))
          (apply merge))))
 
-(defn- validate-opts
-  "Throw an exception if we're missing options and return a map that's suitable
-  as a Velocity context."
-  [{:keys [source param] :as opts}]
-  (if (nil? source)
-    (throw (ex-info (format "Missing source directory -s option")
-                    {:option "-s"}))
-    (-> opts
-        (dissoc :level :config :source :param)
-        (merge (params-to-map param)))))
-
 (defn- handle-exception
   "Handle exceptions thrown from CLI commands."
   [e]
@@ -52,6 +41,37 @@
                  (.getMessage e)
                  (.toString e))))))
 
+(defn print-describe
+  "Print all project build parameters based on a [[project-file-yaml]] found in
+  **src-dir** as markdown."
+  [src-dir]
+  (let [proj (-> (c/project-config src-dir) :project)
+        pname (:name proj)]
+    (println pname)
+    (println (apply str (repeat (count pname) \-)))
+    (println (:description proj))
+    (println)
+    (println "## Parameters")
+    (->> proj :context
+         (map (fn [[op {:keys [description example default]}]]
+                (println (format "  * %s: %s (eg %s)%s"
+                                 (name op) description example
+                                 (if default
+                                   (format ", default: <%s>" default)
+                                   "")))))
+         doall)))
+
+(defn- validate-opts
+  "Throw an exception if we're missing options and return a map that's suitable
+  as a Velocity context."
+  [{:keys [source param] :as opts}]
+  (if (nil? source)
+    (throw (ex-info (format "Missing source directory -s option")
+                    {:option "-s"}))
+    (-> opts
+        (dissoc :level :config :source :param)
+        (merge (params-to-map param)))))
+
 (def ^:private src-option
   ["-s" "--source" (format "the source directory containing the %s file"
                            (c/project-file-yaml))
@@ -61,13 +81,13 @@
 
 (def describe-command
   "CLI command to invoke a parameter list"
-  {:description "list all project configuration parameters"
+  {:description "list all project info and configuration parameters as markdown"
    :options
    [src-option]
    :app (fn [{:keys [source] :as opts} & args]
           (try
             (validate-opts opts)
-            (c/print-help source)
+            (print-describe source)
             (catch Exception e
               (handle-exception e))))})
 

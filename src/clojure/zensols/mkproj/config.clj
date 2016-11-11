@@ -101,17 +101,3 @@
     (when (.exists dir-conf-file)
       (->> (create-config-template template-context dir-conf-file)
            :package :generate (map :directory-map)))))
-
-(defn print-help
-  "Print all project build parameters based on a [[project-file-yaml]] found in
-  **src-dir**."
-  [src-dir]
-  (->> (project-config src-dir)
-       :project :context
-       (map (fn [[op {:keys [description example default]}]]
-              (println (format "%s: %s (eg %s)%s"
-                               (name op) description example
-                               (if default
-                                 (format ", default: <%s>" default)
-                                 "")))))
-       doall))
