@@ -1,8 +1,8 @@
 # An application that templates source code projects.
 
-This application generates project by interpolating variables in files
-recursively starting at a top level directory.  The application is written in
-Clojure, runs on the Java Virtual Machine and
+This application generates boilerplate projects by interpolating variables in
+files recursively starting at a top level directory.  The application is
+written in Clojure, runs on the Java Virtual Machine and
 uses [Velocity](https://velocity.apache.org) for all file parameter
 substitution in templated file.
 

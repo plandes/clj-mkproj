@@ -1,5 +1,5 @@
 (defproject com.zensols.tools/mkproj "0.1.0-SNAPSHOT"
-  :description "Template out projects"
+  :description "Generates boilerplate projects"
   :url "https://github.com/plandes/Natural Language Parse"
   :license {:name "Apache License version 2.0"
             :url "https://www.apache.org/licenses/LICENSE-2.0"
@@ -7,7 +7,7 @@
   :plugins [[lein-codox "0.9.5"]
             [org.clojars.cvillecsteele/lein-git-version "1.0.3"]]
   :codox {:metadata {:doc/format :markdown}
-          :project {:name "Template project"}
+          :project {:name "Boilerplate projects"}
           :output-path "target/doc/codox"}
   :source-paths ["src/clojure"]
   :java-source-paths ["src/java"]
