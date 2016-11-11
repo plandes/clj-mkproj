@@ -22,6 +22,10 @@ Additional [documentation](https://plandes.github.io/clj-mkproj/codox/index.html
 
 ## Usage
 
+All usage commands below use
+the [example](https://github.com/plandes/clj-mkproj/tree/master/example)
+project template included in this repo.
+
 #### Command line help
 
 Get the command line usage by supplying no arguments
