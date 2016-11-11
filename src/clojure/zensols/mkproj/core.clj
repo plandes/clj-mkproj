@@ -12,9 +12,9 @@
           (if refp (println ver/gitref)))})
 
 (def context-commands
-  '((:make zensols.mkproj make-project make-command
+  '((:make zensols.mkproj cli make-command
            classify classify-utterance-command)
-    (:describe zensols.mkproj make-project describe-command
+    (:describe zensols.mkproj cli describe-command
                classify classify-utterance-command)))
 
 (defn ^:private create-command-context []
