@@ -12,10 +12,12 @@
           (if refp (println ver/gitref)))})
 
 (def context-commands
-  '((:make zensols.mkproj cli make-command
-           classify classify-utterance-command)
-    (:describe zensols.mkproj cli describe-command
-               classify classify-utterance-command)))
+  '((:describe zensols.mkproj cli describe-command
+               classify classify-utterance-command)
+    (:config zensols.mkproj cli create-config-command
+             classify classify-utterance-command)
+    (:make zensols.mkproj cli make-command
+           classify classify-utterance-command)))
 
 (defn ^:private create-command-context []
   {:command-defs context-commands
@@ -24,8 +26,3 @@
 (defn -main [& args]
   (let [command-context (create-command-context)]
     (apply cli/process-arguments command-context args)))
-
-;(-main)
-;(-main "describe" "-s" "/Users/landes/view/template/lein")
-(-main "make" "-s" "/Users/landes/view/template/lein" "-p" "package:zensols.nlp,project:clj-nl-parse")
-;(-main "describe" "-s" "/Users/landes/view/template/lein")

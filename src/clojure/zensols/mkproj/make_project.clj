@@ -1,4 +1,6 @@
-(ns zensols.mkproj.make-project
+(ns ^{:doc "The library that orchestrates the creation of the templated target project."
+      :author "Paul Landes"}
+    zensols.mkproj.make-project
   (:require [clojure.java.io :as io]
             [clojure.tools.logging :as log]
             [clj-yaml.core :as yaml])
@@ -9,7 +11,12 @@
   *generate-config*
   "Top level template configuration")
 
-(defn- write-template-reader [reader name dst-file]
+(defn- write-template-reader
+  "Apply and write to the file system the template contents found in
+  **reader**.  The template context (parameters) come
+  from [[*generate-context*]].  Write the output to **dst-file**.  The **name**
+  parameter is usually useless for our usecase."
+  [reader name dst-file]
   (let [{:keys [template-context]} *generate-config*]
     (with-open [writer (io/writer dst-file)]
       (binding [*out* writer]
@@ -19,11 +26,19 @@
              (v/apply-template template-context)
              print)))))
 
-(defn- write-template-file [src-file dst-file]
+(defn- write-template-file
+  "Read a template from **src-file**, apply using
+  context [[*generate-context*]] and write it to **dst-file**.
+
+  See [[write-template-reader]]."
+  [src-file dst-file]
   (with-open [reader (io/reader src-file)]
     (write-template-reader reader (.getName src-file) dst-file)))
 
-(defn- write-project-config [project-config dst-dir]
+(defn- write-project-config
+  "Write the project configuration, **project-config** to the target templated
+  project in **dst-dir**.  The file name comes from [[c/project-file-yaml]]."
+  [project-config dst-dir]
   (let [dst-file (->> (c/project-file-yaml) (io/file dst-dir))]
     (with-open [writer (io/writer dst-file)]
       (binding [*out* writer]
@@ -32,7 +47,11 @@
              println)))
     (log/infof "wrote project config file: %s" dst-file)))
 
-(defn- process-file [src-file dst-file]
+(defn- process-file
+  "Process a source file (**src-file**), optionally apply the template if not
+  an exclude file, and write it to the target templated
+  project (**dst-file**)."
+  [src-file dst-file]
   (log/debugf "processing file: %s -> %s" src-file dst-file)
   (let [{:keys [generate]} *generate-config*
         to-match (.getPath src-file)
@@ -49,7 +68,11 @@
                (if exclude-tempify? "file" "template")
                (.getPath src-file) dst-file)))
 
-(defn- unfold-dirs [cur-dir dst-dir]
+(defn- unfold-dirs
+  "Create a nested `java.io.File` by composition (constructor) from a
+  front-slash delimited path string.  The current directory is given by
+  **cur-dir** and the destination path string is given in **dst-dir**."
+  [cur-dir dst-dir]
   (if-not dst-dir
     cur-dir
     (let [[_ next-dir rest-dir] (re-find #"([^/]+)(\/.+)?" dst-dir)]
@@ -57,7 +80,10 @@
 
 (declare process-directory)
 
-(defn- process-files [dst-dir src-files]
+(defn- process-files
+  "Process files **src-file** by optionally applying a template and writing
+  them to the **dst-dir** destination directory."
+  [dst-dir src-files]
   (->> src-files
        (map (fn [src-file]
               (let [dst-file (io/file dst-dir (.getName src-file))]
@@ -67,7 +93,11 @@
                       (process-directory src-file dst-file)))))
        doall))
 
-(defn- process-directory [src-dir dst-dir]
+(defn- process-directory
+  "Process a source directory **src-dir** by copying or templating and then
+  copying files to destination directory **dst-dir**.  Then apply recursively
+  to all directories."
+  [src-dir dst-dir]
   (log/debugf "processing dir: %s -> %s" src-dir dst-dir)
   (if (not (.exists src-dir))
     (throw (ex-info (format "Directory not found: %s" src-dir)
@@ -96,17 +126,25 @@
                   (process-directory src-dir dst-dir))))
          doall)))
 
-(defn make-project [src-dir override-fn]
+(defn make-project
+  "Create the project templated target found in **src-dir**.  This directory
+  needs a [[project-file-yaml]] file and a directory
+  called [[c/project-file-name]].
+
+  You can change a parameter from what's given in the [[project-file-yaml]] by
+  providing **override-fn**.  This function takes a key and a map with
+  `description`, `example` and `default` keys from the project file and returns
+  a value to use for that parameter."
+  [src-dir override-fn]
   (log/infof "making project from %s" src-dir)
   (let [env (c/project-environment src-dir override-fn)
         {template-directory :template-directory
          template-context :context} env
         {project "project"} template-context
-        dst-dir (io/file template-directory)
+        dst-dir (io/file (.getParentFile (io/file template-directory)) project)
         dst-project-file (io/file dst-dir (c/project-file-yaml))]
     (assert project)
-    (clojure.pprint/pprint env)
-    (log/infof "creating new project %s -> %s" project dst-dir)
+    (log/infof "creating new project %s -> %s" src-dir dst-dir)
     (.mkdirs dst-dir)
     (binding [*generate-config* (merge (dissoc env :template-context)
                                        {:template-context template-context})]
@@ -114,6 +152,7 @@
         (write-project-config cfg dst-dir))
       (process-directory (io/file src-dir c/project-file-name) dst-dir))))
 
-(defn create-mapped-override-fn [map]
+(defn create-mapped-override-fn
+  [map]
   (fn [key def]
     (get map key)))
