@@ -118,17 +118,7 @@
                                        {:template-context template-context})]
       (let [cfg {:project env}]
         (write-project-config cfg dst-dir))
-      (process-directory (io/file src-dir c/project-file-name) dst-dir))
-    ))
-
-(let [dir (io/file "/Users/landes/view/template/lein")]
-  (->> (create-mapped-override-fn {:project "clj-nlp-parse"
-                                   :package "zensols.nlparse"
-                                   :sub-group "com.zensols.nlp"
-                                   :template-directory "/d/exproj"})
-                                        ;(c/project-environment dir) clojure.pprint/pprint
-       ;(make-project dir)
-       ))
+      (process-directory (io/file src-dir c/project-file-name) dst-dir))))
 
 (defn- create-mapped-override-fn [map]
   (fn [key def]
@@ -196,5 +186,4 @@
      :required "PARAMETERS"]]
    :app (fn [{:keys [config source] :as opts} & args]
           (let [opts (validate-opts opts)]
-            (make-from-properties config source opts)
-            ))})
+            (make-from-properties config source opts)))})
