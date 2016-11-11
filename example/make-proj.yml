@@ -1,0 +1,41 @@
+project:
+  name: Zensol Clojure Project
+  description: Simple Clojure project designed to work with [Zensol Build](https://github.com/plandes/clj-zenbuild).
+  template-directory:
+    description: root of source code tree to interpolate
+    example: view/template/proj
+    default: make-proj
+  generate:
+    excludes:
+      - makefile$
+      - LICENSE$
+  context:
+    sub-group:
+      description: maven group coordinate
+      example: com.zensols.nlp
+      default: com.zensols
+    group:
+      description: maven artifact coordinate
+      example: parse
+    package:
+      description: root package space (creates <package>.core)
+      default: zensols
+      example: zensols.nlp
+    project:
+      description: github repo name
+      example: clj-nl-parse
+      default: clj-
+    user:
+      description: github user name
+      example: plandes
+    app-name:
+      description: script name used with appassembler
+      example: nlparser
+    project-name:
+      descripiton: the project name
+      default: WRITE ME
+      example: Natural Language Parse
+    project-description:
+      description: a short project descsripion
+      default: WRITE ME
+      example: This library provides generalized library to deal with natural language.

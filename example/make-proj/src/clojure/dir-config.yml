@@ -1,0 +1,9 @@
+#set($package-dir = $package.replace(".", "/"))
+package:
+  generate:
+    - directory-map:
+        source: pkg-dir
+        destination: ${package-dir}
+    - directory-map:
+        source: ver-dir
+        destination: ${group}
