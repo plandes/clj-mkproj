@@ -1,4 +1,5 @@
 #set($package-dir = $package.replace(".", "/"))
+#set($dst-ver-dir = $group.replace("-", "_"))
 package:
   generate:
     - directory-map:
@@ -6,4 +7,4 @@ package:
         destination: ${package-dir}
     - directory-map:
         source: ver-dir
-        destination: ${group}
+        destination: ${dst-ver-dir}
