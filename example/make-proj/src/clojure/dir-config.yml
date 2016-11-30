@@ -1,4 +1,4 @@
-#set($package-dir = $package.replace(".", "/"))
+#set($package-dir = $package.replace(".", "/").replace("-", "_"))
 #set($dst-ver-dir = $group.replace("-", "_"))
 package:
   generate:
