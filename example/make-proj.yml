@@ -32,7 +32,7 @@ project:
       description: script name used with appassembler
       example: nlparser
     project-name:
-      descripiton: the project name
+      description: the project name
       default: WRITE ME
       example: Natural Language Parse
     project-description:
