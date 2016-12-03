@@ -71,7 +71,7 @@
         (->> env
              :context
              (#(merge % {"template-directory" template-directory
-                         "source" src-dir}))
+                         "source" (.getAbsolutePath src-dir)}))
              (#(doto (java.util.Properties.)
                  (.putAll %)
                  (.store writer comments))))))
