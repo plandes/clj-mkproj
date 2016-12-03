@@ -70,7 +70,8 @@
             template-directory (:template-directory env)]
         (->> env
              :context
-             (#(assoc % "template-directory" template-directory))
+             (#(merge % {"template-directory" template-directory
+                         "source" src-dir}))
              (#(doto (java.util.Properties.)
                  (.putAll %)
                  (.store writer comments))))))
