@@ -153,6 +153,7 @@
       (process-directory (io/file src-dir c/project-file-name) dst-dir))))
 
 (defn create-mapped-override-fn
+  "Default override function for [[make-project]]."
   [map]
   (fn [key def]
     (get map key)))
