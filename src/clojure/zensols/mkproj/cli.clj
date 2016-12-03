@@ -7,20 +7,28 @@
   (:require [zensols.mkproj.config :as c]
             [zensols.mkproj.make-project :as m]))
 
+(def ^:dynamic *dump-jvm-on-error* true)
+
 (def ^:private default-config-file
   "The default configuration file to get parameters for project configuration."
   (io/file "mkproj.properties"))
 
+(defn- config-properties
+  "Return the configuration properties as a map."
+  [{:keys [config] :as opts}]
+  (log/debugf "config properties: opts=<%s>" opts)
+  (->> opts
+       (merge (if (.exists config)
+                (c/load-props config)))))
+
 (defn- make-from-properties
   "Create the project templated target found in **src-dir** using command line
-  options **opts** and project configuration **config-file**."
-  [config-file src-dir opts]
-  (log/infof "reading config file: %s" config-file)
-  (let [props (->> opts
-                   (merge (if (.exists config-file)
-                            (c/load-props config-file))))]
-    (->> (m/create-mapped-override-fn props)
-         (m/make-project src-dir))))
+  options **opts** and project configuration **config**."
+  [config src-dir opts]
+  (log/infof "reading config file: %s" config)
+  (->> (config-properties opts)
+       m/create-mapped-override-fn
+       (m/make-project src-dir)))
 
 (defn- params-to-map
   "Create a map from a key/value pair embedded string."
@@ -39,7 +47,10 @@
     (binding [*out* *err*]
       (println (if ex-data
                  (.getMessage e)
-                 (.toString e))))))
+                 (.toString e)))))
+  (if *dump-jvm-on-error*
+    (System/exit 1)
+    (throw e)))
 
 (defn print-describe
   "Print all project build parameters based on a [[project-file-yaml]] found in
@@ -65,12 +76,16 @@
   "Throw an exception if we're missing options and return a map that's suitable
   as a Velocity context."
   [{:keys [source param] :as opts}]
-  (if (nil? source)
-    (throw (ex-info (format "Missing source directory -s option")
-                    {:option "-s"}))
-    (-> opts
-        (dissoc :level :config :source :param)
-        (merge (params-to-map param)))))
+  (-> (if-not (nil? source)
+        opts
+        (let [{:keys [source] :as opts} (config-properties opts)]
+          (if (nil? source)
+            (throw (ex-info (format "Missing source directory -s option")
+                            {:option "-s"})))
+          opts))
+      (dissoc :level :param)
+      (merge (params-to-map param))
+      (#(do (log/debugf "val opts: <%s>" opts) %))))
 
 (def ^:private src-option
   ["-s" "--source" (format "the source directory containing the %s file"
@@ -114,14 +129,16 @@
   {:description "generate a template rollout of a project"
    :options
    [src-option
-    ["-c" "--config" "location of the configuration file"
+    ["-c" "--config" "location of the properties configuration file"
      :required "FILENAME"
      :default default-config-file
      :parse-fn io/file]
     ["-p" "--param" "list of project parameters (ie package:zensols.nlp,project:clj-nl-parse), see describe command"
      :required "PARAMETERS"]]
    :app (fn [{:keys [config source] :as opts} & args]
-          (let [opts (validate-opts opts)]
+          (let [{:keys [source] :as opts} (validate-opts opts)]
+            (log/debugf "config: %s, source: %s, opts: <%s>"
+                        config source opts)
             (try (make-from-properties config source opts)
                  (catch Exception e
                    (handle-exception e)))))})
