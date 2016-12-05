@@ -23,8 +23,12 @@ Additional [documentation](https://plandes.github.io/clj-mkproj/codox/index.html
 ## Usage
 
 All usage commands below use
-the [example](https://github.com/plandes/clj-mkproj/tree/master/example)
-project template included in this repo.
+the [example](https://github.com/plandes/template/tree/master/lein)
+project template included in this repo.  For them to work, first clone the
+project:
+```bash
+$ ( cd .. ; git clone https://github.com/plandes/template )
+```
 
 #### Command line help
 
@@ -52,7 +56,7 @@ describe	list all project configuration parameters
 Get information and parameters we can set, which are used to interpolate in the
 destination target file:
 ```bash
-$ lein run describe -s example
+$ lein run describe -s ../template/lein
 Zensol Clojure Project
 ----------------------
 Simple Clojure project designed to work with [Zensol Build](https://github.com/plandes/clj-zenbuild).
@@ -71,13 +75,15 @@ Simple Clojure project designed to work with [Zensol Build](https://github.com/p
 Create a configuration file based off the definition in the project template
 source:
 ```bash
-$ mkproj config -s example
+$ mkproj config -s ../template/lein
+mkproj: wrote configuration file: mkproj.properties
 ```
 
 Here are the contents of this new file:
 ```properties
 #generated from source directory example
 #Thu Nov 10 23:39:36 CST 2016
+source=../../template/lein
 project-description=WRITE ME
 project-name=WRITE ME
 user=plandes

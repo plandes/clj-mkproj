@@ -43,11 +43,12 @@
   [e]
   (if (instance? java.io.FileNotFoundException e)
     (binding [*out* *err*]
-      (println (.getMessage e)))
+      (println (format "io error: %s" (.getMessage e))))
     (binding [*out* *err*]
-      (println (if ex-data
-                 (.getMessage e)
-                 (.toString e)))))
+      (println (format "error: %s"
+                       (if ex-data
+                         (.getMessage e)
+                         (.toString e))))))
   (if *dump-jvm-on-error*
     (System/exit 1)
     (throw e)))
