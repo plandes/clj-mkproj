@@ -25,5 +25,6 @@
 
 (defn -main [& args]
   (lu/configure "mkproj-log4j2.xml")
+  (cil/set-program-name "mkroj")
   (let [command-context (create-command-context)]
     (apply cli/process-arguments command-context args)))
