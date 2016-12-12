@@ -4,7 +4,8 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
             [clojure.tools.logging :as log])
-  (:require [zensols.actioncli.parse :refer (with-exception)])
+  (:require [zensols.actioncli.parse :refer (with-exception)]
+            [zensols.actioncli.log4j2 :as lu])
   (:require [zensols.mkproj.config :as c]
             [zensols.mkproj.make-project :as m]))
 
@@ -85,7 +86,8 @@
   "CLI command to invoke a parameter list"
   {:description "list all project info and configuration parameters as markdown"
    :options
-   [src-option]
+   [src-option
+    (lu/log-level-set-option)]
    :app (fn [{:keys [source] :as opts} & args]
           (with-exception
             (validate-opts opts)
@@ -96,6 +98,7 @@
   {:description "create a project configuration file (use -c with make command)"
    :options
    [src-option
+    (lu/log-level-set-option)
     ["-d" "--destination" (format "the output file"
                                   (c/project-file-yaml))
      :required "FILENAME"
@@ -112,6 +115,7 @@
   {:description "generate a template rollout of a project"
    :options
    [src-option
+    (lu/log-level-set-option)
     ["-c" "--config" "location of the properties configuration file"
      :required "FILENAME"
      :default default-config-file

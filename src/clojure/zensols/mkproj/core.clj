@@ -24,5 +24,6 @@
    :single-commands {:version version-info-command}})
 
 (defn -main [& args]
+  (lu/configure "mkproj-log4j2.xml")
   (let [command-context (create-command-context)]
     (apply cli/process-arguments command-context args)))
