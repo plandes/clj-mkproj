@@ -31,7 +31,7 @@
                  [clj-yaml "0.4.0"]
 
                  ;; command line
-                 [com.zensols.tools/actioncli "0.0.11"]]
+                 [com.zensols.tools/actioncli "0.0.12"]]
   :pom-plugins [[org.codehaus.mojo/appassembler-maven-plugin "1.6"
                  {:configuration ([:programs
                                    [:program
