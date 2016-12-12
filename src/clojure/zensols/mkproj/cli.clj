@@ -4,6 +4,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
             [clojure.tools.logging :as log])
+  (:require [zensols.actioncli.parse :refer (with-exception)])
   (:require [zensols.mkproj.config :as c]
             [zensols.mkproj.make-project :as m]))
 
@@ -37,21 +38,6 @@
     (->> (#(s/split str #","))
          (map #(->> % (re-find #"^(.+?):(.+)$") rest (apply hash-map)))
          (apply merge))))
-
-(defn- handle-exception
-  "Handle exceptions thrown from CLI commands."
-  [e]
-  (if (instance? java.io.FileNotFoundException e)
-    (binding [*out* *err*]
-      (println (format "io error: %s" (.getMessage e))))
-    (binding [*out* *err*]
-      (println (format "error: %s"
-                       (if ex-data
-                         (.getMessage e)
-                         (.toString e))))))
-  (if *dump-jvm-on-error*
-    (System/exit 1)
-    (throw e)))
 
 (defn print-describe
   "Print all project build parameters based on a [[project-file-yaml]] found in
@@ -101,11 +87,9 @@
    :options
    [src-option]
    :app (fn [{:keys [source] :as opts} & args]
-          (try
+          (with-exception
             (validate-opts opts)
-            (print-describe source)
-            (catch Exception e
-              (handle-exception e))))})
+            (print-describe source)))})
 
 (def create-config-command
   "CLI command to create a project configuration file"
@@ -119,11 +103,9 @@
      :validate [#(and % (.isDirectory %)) "Not a directory"]
      :parse-fn io/file]]
    :app (fn [{:keys [source destination] :as opts} & args]
-          (try
+          (with-exception
             (validate-opts opts)
-            (c/create-template-config source destination)
-            (catch Exception e
-              (handle-exception e))))})
+            (c/create-template-config source destination)))})
 
 (def make-command
   "CLI command to invoke a template rollout of a project"
@@ -140,6 +122,5 @@
           (let [{:keys [source] :as opts} (validate-opts opts)]
             (log/debugf "config: %s, source: %s, opts: <%s>"
                         config source opts)
-            (try (make-from-properties config source opts)
-                 (catch Exception e
-                   (handle-exception e)))))})
+            (with-exception
+              (make-from-properties config source opts))))})
