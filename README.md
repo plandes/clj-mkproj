@@ -30,6 +30,25 @@ project:
 $ ( cd .. ; git clone https://github.com/plandes/template )
 ```
 
+Learn what parameters need to be set and what they mean:
+```bash
+mkproj describe -s ../template/lein
+```
+
+Create a configuration file:
+```bash
+$ mkproj config -s ../template/lein
+mkproj: wrote configuration file: mkproj.properties
+```
+
+Now edit the `mkproj.properties` based on what we learned in the *describe* step:
+```bash
+$ mkproj make
+mkproj: reading config file: mkproj.properties
+mkproj: making project from /Users/landes/tmp/t/e/../template/lein
+...
+```
+
 #### Command line help
 
 Get the command line usage by supplying no arguments:
@@ -50,6 +69,7 @@ describe	list all project configuration parameters
  version	Get the version of the application.
   -g, --gitref
 ```
+
 
 #### Project metadata
 
