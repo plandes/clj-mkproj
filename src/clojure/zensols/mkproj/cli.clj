@@ -9,8 +9,6 @@
   (:require [zensols.mkproj.config :as c]
             [zensols.mkproj.make-project :as m]))
 
-(def ^:dynamic *dump-jvm-on-error* true)
-
 (def ^:private default-config-file
   "The default configuration file to get parameters for project configuration."
   (io/file "mkproj.properties"))
@@ -20,7 +18,7 @@
   [{:keys [config] :as opts}]
   (log/debugf "config properties: opts=<%s>" opts)
   (->> opts
-       (merge (if (.exists config)
+       (merge (if (and config (.exists config))
                 (c/load-props config)))))
 
 (defn- make-from-properties
