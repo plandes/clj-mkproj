@@ -17,7 +17,7 @@ However, any directory subtree can be used--computer language or otherwise.
 
 ## Documentation
 
-Additional [documentation](https://plandes.github.io/clj-mkproj/codox/index.html).
+API [documentation](https://plandes.github.io/clj-mkproj/codox/index.html).
 
 
 ## Usage
@@ -34,6 +34,7 @@ Learn what parameters need to be set and what they mean:
 ```bash
 mkproj describe -s ../template/lein
 ```
+See [project metadata](#project-metadata) section for more innformation.
 
 Create a configuration file:
 ```bash
@@ -41,15 +42,20 @@ $ mkproj config -s ../template/lein
 mkproj: wrote configuration file: mkproj.properties
 ```
 
-Now edit the `mkproj.properties` based on what we learned in the *describe* step:
+Now edit the `mkproj.properties` based on what we learned in the *describe*
+step.  See [configuring the project](#configuring-the-project) for more
+information.
+
+Finally build out the project from the template:
 ```bash
 $ mkproj make
 mkproj: reading config file: mkproj.properties
-mkproj: making project from /Users/landes/tmp/t/e/../template/lein
+mkproj: making project from ../template/lein
+mkproj: creating new project ../template/lein -> clj-someproject
 ...
 ```
 
-#### Command line help
+### Command line help
 
 Get the command line usage by supplying no arguments:
 ```sql
@@ -71,7 +77,7 @@ describe	list all project configuration parameters
 ```
 
 
-#### Project metadata
+### Project Metadata
 
 Get information and parameters we can set, which are used to interpolate in the
 destination target file:
@@ -92,14 +98,10 @@ Simple Clojure project designed to work with [Zensol Build](https://github.com/p
   * project-description: a short project descsripion (eg This library provides generalized library to deal with natural language.), default: <WRITE ME>
 ```
 
-Create a configuration file based off the definition in the project template
-source:
-```bash
-$ mkproj config -s ../template/lein
-mkproj: wrote configuration file: mkproj.properties
-```
+#### Configuring the Project
 
-Here are the contents of this new file:
+After creating the configuraiton data in the [*config*](#usage) step modify
+each property if necessary (in most cases you'll want to).
 ```properties
 #generated from source directory example
 #Thu Nov 10 23:39:36 CST 2016
@@ -115,31 +117,10 @@ group=parse
 app-name=nlparser
 ```
 
-#### Make the project
-
-Finally make/create the project template target:
-
-```bash
-$ mkproj make -s example
-mkproj: reading config file: mkproj.properties
-mkproj: making project from example
-mkproj: creating new project example -> clj-nlp-parse
-mkproj: wrote project config file: clj-nlp-parse/make-proj.yml
-mkproj: creating directory: clj-nlp-parse
-mkproj: wrote file example/make-proj/LICENSE -> clj-nlp-parse/LICENSE
-mkproj: wrote template example/make-proj/README.md -> clj-nlp-parse/README.md
-mkproj: wrote file example/make-proj/makefile -> clj-nlp-parse/makefile
-mkproj: wrote template example/make-proj/project.clj -> clj-nlp-parse/project.clj
-mkproj: creating directory: clj-nlp-parse/src
-mkproj: creating directory: clj-nlp-parse/src/clojure
-mkproj: creating directory: clj-nlp-parse/src/clojure/zensols/nlparse
-mkproj: wrote template example/make-proj/src/clojure/pkg-dir/core.clj -> clj-nlp-parse/src/clojure/zensols/nlparse/core.clj
-mkproj: wrote template example/make-proj/src/clojure/pkg-dir/hello_world.clj -> clj-nlp-parse/src/clojure/zensols/nlparse/hello_world.clj
-mkproj: creating directory: clj-nlp-parse/src/clojure/parse
-mkproj: wrote template example/make-proj/src/clojure/ver-dir/.gitignore -> clj-nlp-parse/src/clojure/parse/.gitignore
-mkproj: creating directory: clj-nlp-parse/test-resources
-mkproj: wrote template example/make-proj/test-resources/log4j2.xml -> clj-nlp-parse/test-resources/log4j2.xml
-```
+**Imporant:** Every `mkproj.properties` should have a `project` property since
+this is the name of the top root level subdirectory to create.  For this
+reason, the `make-proj.yml` that the `mkproj.properties` is generated from
+*should* have a `:project` section in the `:context` as well.
 
 
 ## Building
