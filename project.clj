@@ -19,6 +19,8 @@
 
                  ;; logging
                  [org.apache.logging.log4j/log4j-core "2.7"]
+                 [org.apache.logging.log4j/log4j-slf4j-impl "2.7"]
+                 [org.apache.logging.log4j/log4j-jcl "2.7"]
 
                  ;; templating
                  [org.apache.velocity/velocity "1.7"]

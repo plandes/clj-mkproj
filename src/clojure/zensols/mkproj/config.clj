@@ -11,6 +11,10 @@
   "Name of the top level project template build file."
   "make-proj")
 
+(def ^:dynamic *project-environment-validations*
+  "Portions of the project environment for which to validate existence."
+  #{:template-directory :template-context :context :project})
+
 (defn project-file-yaml
   "The project file found at the root of a build configuration.
 
@@ -36,6 +40,25 @@
                           io/reader)]
     (->> reader slurp yaml/parse-string)))
 
+(defn- validate-project-environment [src-dir project-environment]
+  (log/debugf "validating environment <%s>" (pr-str project-environment))
+  (let [{template-directory :template-directory
+         template-context :context} project-environment
+        {project "project"} template-context]
+    (if (and (contains? *project-environment-validations* :template-directory)
+             (not template-directory))
+      (throw (ex-info "Missing :template-directory in %s" src-dir
+                      {:src-dir src-dir})))
+    (if (and (contains? *project-environment-validations* :template-context)
+             (not template-context))
+      (throw (ex-info (format "Missing :context in %s" src-dir)
+                      {:src-dir src-dir})))
+    (if (and (contains? *project-environment-validations* :project)
+             (not project))
+      (throw (ex-info (format "Missing :project in :context in %s" src-dir)
+                      {:src-dir src-dir}))))
+  project-environment)
+
 (defn project-environment
   "Parse and create a indigestible configuration file ([[project-file-yaml]])."
   ([src-dir]
@@ -57,7 +80,8 @@
             (merge (->> top-level-vert
                         (map #(hash-map % (get proj %)))
                         (apply merge))
-                   top-level-mod))))))
+                   top-level-mod)
+            (validate-project-environment src-dir))))))
 
 (defn create-template-config
   "Wrte a configuration file based on a project configuration file.
@@ -66,15 +90,17 @@
   [src-dir out-property-file]
   (let [comments (format "generated from source directory %s" src-dir)]
     (with-open [writer (io/output-stream out-property-file)]
-      (let [env (project-environment src-dir)
-            template-directory (:template-directory env)]
-        (->> env
-             :context
-             (#(merge % {"template-directory" template-directory
-                         "source" (.getAbsolutePath src-dir)}))
-             (#(doto (java.util.Properties.)
-                 (.putAll %)
-                 (.store writer comments))))))
+      (binding [*project-environment-validations*
+                #{:template-directory :template-context :context :project}]
+       (let [env (project-environment src-dir)
+             template-directory (:template-directory env)]
+         (->> env
+              :context
+              (#(merge % {"template-directory" template-directory
+                          "source" (.getAbsolutePath src-dir)}))
+              (#(doto (java.util.Properties.)
+                  (.putAll %)
+                  (.store writer comments)))))))
     (log/infof "wrote configuration file: %s" out-property-file)))
 
 (defn- create-config-template

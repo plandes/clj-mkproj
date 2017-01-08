@@ -28,3 +28,6 @@
   (cli/set-program-name "mkroj")
   (let [command-context (create-command-context)]
     (apply cli/process-arguments command-context args)))
+
+(binding [cli/*dump-jvm-on-error* false]
+  (-main "config" "-s" "/Users/landes/view/template/elisp"))

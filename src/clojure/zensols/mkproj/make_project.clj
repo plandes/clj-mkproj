@@ -126,19 +126,6 @@
                   (process-directory src-dir dst-dir))))
          doall)))
 
-(defn narrow-project [project-environment]
-  (let [{template-directory :template-directory
-         template-context :context} project-environment
-        {:keys [project]} template-context]
-    (if-not template-context
-      (throw (ex-info (format "Missing :context in directory %s"
-                              template-directory)
-                      {:template-directory template-directory})))
-    (if-not project
-      (throw (ex-info (format "Missing :project in :context in directory %s"
-                              template-directory)
-                      {:template-directory template-directory})))))
-
 (defn make-project
   "Create the project templated target found in **src-dir**.  This directory
   needs a [[project-file-yaml]] file and a directory
@@ -153,7 +140,7 @@
   (let [env (c/project-environment src-dir override-fn)
         {template-directory :template-directory
          template-context :context} env
-        project (narrow-project env)
+        {project "project"} template-context
         dst-dir (io/file (.getParentFile (io/file template-directory)) project)
         dst-project-file (io/file dst-dir (c/project-file-yaml))]
     (assert project)

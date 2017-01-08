@@ -12,7 +12,7 @@
     </appenders>
 
     <loggers>
-        <logger name="zensols.mkproj" level="info"/>
+        <logger name="zensols.mkproj" level="debug"/>
         <root level="warn">
             <appenderRef ref="console"/>
             <appenderRef ref="repl"/>
