@@ -10,9 +10,9 @@ Features include:
 * [Interpolate](https://en.wikipedia.org/wiki/String_interpolation) strings in templated files.
 * Each parameter supports example, description and default metadata.
 * Support for parameter substitution for directory names.
-* Map directory names templating parameter variables to different paths (in the
-  same or other directory in the target).
-* Map file names using templating parameter variables.
+* Map file and directory names templating parameter variables to different
+  paths in the same or other directory in the target (see
+  the [dsl](#directory-level-dsl) section).
 * Date support using [DateTool](https://velocity.apache.org/tools/devel/apidocs/org/apache/velocity/tools/generic/DateTool.html).
 
 This is meant to supplement your own custom projects much like:
@@ -32,6 +32,9 @@ for a complete `mkproj` template.
   * [Command Line](#command-line-help)
   * [Project Metadata](#project-metadata)
     * [Configuration](#configuring-the-project)
+  * [Project Metadata DSL](#project-metadata-dsl)
+    * [Top Level](#top-level-dsl)
+    * [Directory Level](#directory-level-dsl)
   * [Building](#building)
 
 
