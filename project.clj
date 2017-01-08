@@ -26,6 +26,7 @@
 
                  ;; templating
                  [org.apache.velocity/velocity "1.7"]
+                 [org.apache.velocity/velocity-tools "2.0"]
 
                  ;; yaml parsing
                  [clj-yaml "0.4.0"]

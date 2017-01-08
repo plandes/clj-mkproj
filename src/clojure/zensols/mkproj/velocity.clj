@@ -3,7 +3,8 @@
     zensols.mkproj.velocity
   (:import [org.apache.velocity VelocityContext Template]
            [org.apache.velocity.app Velocity]
-           [org.apache.velocity.runtime RuntimeSingleton])
+           [org.apache.velocity.runtime RuntimeSingleton]
+           [org.apache.velocity.tools.generic DateTool])
   (:require [clojure.java.io :as io]))
 
 ;; initialize the Velocity system at library load
@@ -39,5 +40,6 @@
   [context template]
   (let [vctx (VelocityContext. (java.util.HashMap. context))
         writer (java.io.StringWriter.)]
+    (.put vctx "dateTool" (DateTool.))
     (.merge template vctx writer)
     (.toString writer)))
