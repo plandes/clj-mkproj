@@ -24,7 +24,13 @@
    :single-commands {:version version-info-command}})
 
 (defn -main [& args]
-  (lu/configure "mkproj-log4j2.xml")
+  ;(lu/configure "mkproj-log4j2.xml")
   (cli/set-program-name "mkroj")
   (let [command-context (create-command-context)]
     (apply cli/process-arguments command-context args)))
+
+(case 2
+  1 (binding [cli/*dump-jvm-on-error* false]
+      (-main "config" "-s" "/Users/landes/view/template/elisp"))
+  2 (binding [cli/*dump-jvm-on-error* false]
+      (-main "make")))

@@ -118,13 +118,30 @@
       (.load props reader)
       (into {} (for [[k v] props] [(keyword k) v])))))
 
-(defn dir-configs
+(defn- dir-configs
   "If **src-dir** has contains a [[project-dir-config]] file, parse it and
-  return a directory mapping.  This mapping is a string directory of a
-  directory name in the project build that maps to a different directory name
-  in the applied target."
+  return the directory and file mappings."
   [template-context src-dir]
   (let [dir-conf-file (io/file src-dir (project-dir-config))]
     (when (.exists dir-conf-file)
       (->> (create-config-template template-context dir-conf-file)
-           :package :generate (map :directory-map)))))
+           :package :generate))))
+
+(defn directory-mappings
+  "If **src-dir** has contains a [[project-dir-config]] file, parse it and
+  return the file mappings.  This mapping is a string directory of a
+  directory name in the project build that maps to a different directory name
+  in the applied target."
+  [template-context src-dir]
+  (->> (dir-configs template-context src-dir)
+       (map :directory-map)))
+
+(defn file-mappings
+  "If **src-dir** has contains a [[project-dir-config]] file, parse it and
+  return the file mappings.  This mapping is a string file name in the project
+  build that maps to a different file name in the *same directory* relative to
+  the destination directory (see [[directory-mappings]])."
+  [template-context src-dir]
+  (->> (dir-configs template-context src-dir)
+       (map :file-map)
+       (#(zipmap (map :source %) (map :destination %)))))

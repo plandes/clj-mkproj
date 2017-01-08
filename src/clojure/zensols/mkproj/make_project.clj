@@ -83,15 +83,22 @@
 (defn- process-files
   "Process files **src-file** by optionally applying a template and writing
   them to the **dst-dir** destination directory."
-  [dst-dir src-files]
-  (->> src-files
-       (map (fn [src-file]
-              (let [dst-file (io/file dst-dir (.getName src-file))]
-                (cond (.isFile src-file)
-                      (process-file src-file dst-file)
-                      (.isDirectory src-file)
-                      (process-directory src-file dst-file)))))
-       doall))
+  [template-context src-dir dst-dir src-files]
+  (let [file-mappings (c/file-mappings template-context src-dir)]
+    (log/debugf "file mappings: <%s>" (pr-str file-mappings))
+    (->> src-files
+         (map (fn [src-file]
+                (let [src-name (.getName src-file)
+                      dst-name (or (get file-mappings src-name) src-name)
+                      dst-file (io/file dst-dir dst-name)]
+                  (log/tracef "%s, %s, %s, %s"
+                              (get file-mappings src-name) src-name
+                              dst-name dst-file)
+                  (cond (.isFile src-file)
+                        (process-file src-file dst-file)
+                        (.isDirectory src-file)
+                        (process-directory src-file dst-file)))))
+         doall)))
 
 (defn- process-directory
   "Process a source directory **src-dir** by copying or templating and then
@@ -105,7 +112,7 @@
   (log/infof "creating directory: %s" dst-dir)
   (.mkdirs dst-dir)
   (let [{:keys [template-context]} *generate-config*
-        confs (->> (c/dir-configs template-context src-dir)
+        confs (->> (c/directory-mappings template-context src-dir)
                    (map (fn [{:keys [source] :as m}]
                           (if m
                             {(name source) (dissoc m :source)})))
@@ -117,7 +124,7 @@
                    (or (and (.isFile file)
                             (= (.getName file) (c/project-dir-config)))
                        (contains? confs (.getName file)))))
-         (process-files dst-dir))
+         (process-files template-context src-dir dst-dir))
     (->> confs
          (map (fn [[src {:keys [destination]}]]
                 (let [dst-dir (unfold-dirs dst-dir destination)

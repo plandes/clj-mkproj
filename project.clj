@@ -14,12 +14,14 @@
   :javac-options ["-Xlint:unchecked"]
   :jar-exclusions [#".gitignore"]
   :exclusions [org.slf4j/slf4j-log4j12
+               log4j/log4j
                ch.qos.logback/logback-classic]
   :dependencies [[org.clojure/clojure "1.8.0"]
 
                  ;; logging
                  [org.apache.logging.log4j/log4j-core "2.7"]
                  [org.apache.logging.log4j/log4j-slf4j-impl "2.7"]
+                 [org.apache.logging.log4j/log4j-1.2-api "2.7"]
                  [org.apache.logging.log4j/log4j-jcl "2.7"]
 
                  ;; templating
