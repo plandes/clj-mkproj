@@ -274,7 +274,7 @@ API [documentation](https://plandes.github.io/clj-mkproj/codox/index.html).
 
 ## License
 
-Copyright © 2016 Paul Landes
+Copyright © 2016 - 2017 Paul Landes
 
 Apache License version 2.0
 
