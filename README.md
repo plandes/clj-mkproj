@@ -1,31 +1,52 @@
-# An application that templates source code projects.
+# Easy to Use Project Scaffolding/Templating Tool
 
 This application generates boilerplate projects by interpolating variables in
-files recursively starting at a top level directory.  The application is
-written in Clojure, runs on the Java Virtual Machine and
+files recursively starting at a top level directory recursively.  The
+application is written in Clojure, runs on the Java Virtual Machine and
 uses [Velocity](https://velocity.apache.org) for all file parameter
 substitution in templated file.
 
 Features include:
-* Interpolate strings in templated files.
+* [Interpolate](https://en.wikipedia.org/wiki/String_interpolation) strings in templated files.
 * Each parameter supports example, description and default metadata.
 * Support for parameter substitution for directory names.
+* Map directory names templating parameter variables to different paths (in the
+  same or other directory in the target).
+* Map file names using templating parameter variables.
+* Date support using [DateTool](https://velocity.apache.org/tools/devel/apidocs/org/apache/velocity/tools/generic/DateTool.html).
 
-The project was specifically written for Clojure (as is the example given).
-However, any directory subtree can be used--computer language or otherwise.
+This is meant to supplement your own custom projects much like:
+* `mvn archetype:generate`
+* `lein new default`
+* `sbt new`
+
+See the
+[https://github.com/plandes/template](https://github.com/plandes/template/tree/master/lein) project
+for a complete `mkproj` template.
 
 
-## Documentation
+## Table of Contents
 
-API [documentation](https://plandes.github.io/clj-mkproj/codox/index.html).
+* [Usage](#usage)
+  * [Quick Start](#quick-start)
+  * [Command Line](#command-line-help)
+  * [Project Metadata](#project-metadata)
+    * [Configuration](#configuring-the-project)
+  * [Building](#building)
 
 
 ## Usage
 
+The application is a command line program that includes an *action* parameter
+to tell it what to do followed by parameters specific to that action.  The end
+result is a project you can literally build out of the box.
+
+
+### Quick Start
+
 All usage commands below use
-the [example](https://github.com/plandes/template/tree/master/lein)
-project template included in this repo.  For them to work, first clone the
-project:
+the [example](https://github.com/plandes/template/tree/master/lein) project
+template.  For them to work, first clone the project:
 ```bash
 $ ( cd .. ; git clone https://github.com/plandes/template )
 ```
@@ -123,6 +144,107 @@ reason, the `make-proj.yml` that the `mkproj.properties` is generated from
 *should* have a `:project` section in the `:context` as well.
 
 
+## Project Metadata DSL
+
+Each template has a project metadata [YAML](http://yaml.org) configuration file
+that includes what each parameter to be interpolated/substituted in the
+resulting output.  The output of this data is
+the [project metadata](#project-metadata) `mkproj.properties` file.
+
+There are two configuration `.yml` files:
+* [top level](#top-level-dsl)
+* [directory level](#directory-level-dsl)
+
+
+### Top Level DSL
+
+Here's a
+[portion](https://github.com/plandes/template/blob/master/lein/make-proj.yml)
+from the [lein](https://github.com/plandes/template/tree/master/lein) template
+to illustrate part by part:
+```yaml
+project:
+  name: Zensol Clojure Project
+  description: Simple Clojure project designed to work with [Zensol Build](https://github.com/plandes/clj-zenbuild).
+```
+This defines top level project information
+
+```yaml
+  template-directory:
+    description: root of source code tree to interpolate
+    example: view/template/proj
+    default: make-proj
+```
+This provides (`default parameter`) the path to the directory that has the files that will be
+recursively processed and interpolated.
+
+```yaml
+  generate:
+    excludes:
+      - makefile$
+      - LICENSE$
+```
+The generation section tells what and how to generate the files.  The
+`excludes:` provides a list of regular expressions that indicate which files
+to leave as is *without* interpolation.
+
+```yaml
+  context:
+    sub-group:
+      description: maven group coordinate
+      example: com.zensols.nlp
+      default: com.zensols
+```
+The `context:` section provides a name, description and an optional default and
+example of what the parameter values are.  When processing files the example is
+used if default isn't given.
+
+
+### Directory Level DSL
+
+Each directory (including the root) can have a `dir-config.yml` that defines
+mappings for directories and files.   Let's start with a file mapping example
+that comes from the [Emacs Lisp](https://github.com/plandes/template/blob/master/elisp/make-proj/dir-config.yml) template:
+```yaml
+package:
+  generate:
+    - file-map:
+        source: source-file.el
+        destination: ${project-name}.el
+```
+The `file-map` parameter repeats with two children nodes: `source` and
+`destination`.  In this case we map `source-file.el` in the source template
+directory to the name of the package with the `.el` extension mapped to the
+target output directory.
+
+Our next example comes from the [lein](https://github.com/plandes/template/blob/master/lein/make-proj/src/clojure/dir-config.yml) template:
+```yaml
+#set($package-dir = $package.replace(".", "/").replace("-", "_"))
+#set($dst-ver-dir = $group.replace("-", "_"))
+package:
+  generate:
+    - directory-map:
+        source: pkg-dir
+        destination: ${package-dir}
+    - directory-map:
+        source: ver-dir
+        destination: ${dst-ver-dir}
+```
+The first two lines that start with `#`
+tell [Velocity](https://velocity.apache.org) to set two variables `package-dir`
+and `dst-ver-dir`, which are used in the template.
+
+Like `file-map` the `directory-map` is a list with a source and destination
+(target) that map a directory.
+
+The target directory can be any *N* deep subdirectory and the tool creates
+these directories for those that don't exist.  This is the case with the
+`package-dir` variable as we replace a Clojure (as the case with Java) a
+directory structure that's isomorphic with the package namespace.  The second
+replace from dashes to underscores is a Clojure package to directory specific
+namespace syntax rule.
+
+
 ## Building
 
 To build from source, do the folling:
@@ -143,6 +265,12 @@ Note that you can also build a single jar file with all the dependencies with:
 ```bash
    make uber
 ```
+
+
+## Documentation
+
+API [documentation](https://plandes.github.io/clj-mkproj/codox/index.html).
+
 
 ## License
 
