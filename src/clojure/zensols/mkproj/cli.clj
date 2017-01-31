@@ -11,15 +11,17 @@
 
 (def ^:private default-config-file
   "The default configuration file to get parameters for project configuration."
-  (io/file "mkproj.properties"))
+  (io/file "mkproj.yml"))
 
 (defn- config-properties
   "Return the configuration properties as a map."
   [{:keys [config] :as opts}]
   (log/debugf "config properties: opts=<%s>" opts)
-  (->> opts
-       (merge (if (and config (.exists config))
-                (c/load-props config)))))
+  (let [conf (->> opts
+                  (merge (if (and config (.exists config))
+                           (c/load-props config))))]
+    (log/debugf "config loaded properties: opts=<%s>" (pr-str conf))
+    conf))
 
 (defn- make-from-properties
   "Create the project templated target found in **src-dir** using command line
@@ -35,8 +37,10 @@
   [str]
   (when str
     (->> (#(s/split str #","))
-         (map #(->> % (re-find #"^(.+?):(.+)$") rest (apply hash-map)))
-         (apply merge))))
+         (map #(->> % (re-find #"^(.+?):(.+)$") rest))
+         (map (fn [[k v]]
+                [(keyword k) v]))
+         (into {}))))
 
 (defn print-describe
   "Print all project build parameters based on a [[project-file-yaml]] found in
@@ -76,20 +80,30 @@
 (def ^:private src-option
   ["-s" "--source" (format "the source directory containing the %s file"
                            (c/project-file-yaml))
-   :required "FILENAME"
+   :required "<file>"
    :validate [#(and % (.isDirectory %)) "Not a directory"]
    :parse-fn io/file])
+
+(defn- config-option
+  ([]
+   (config-option default-config-file))
+  ([default-config-file]
+   ["-c" "--config" "location of the project instance configuration file"
+    :required "<file>"
+    :default default-config-file
+    :parse-fn io/file]))
 
 (def describe-command
   "CLI command to invoke a parameter list"
   {:description "list all project info and configuration parameters as markdown"
    :options
    [src-option
-    (lu/log-level-set-option)]
+    (lu/log-level-set-option)
+    (config-option)]
    :app (fn [{:keys [source] :as opts} & args]
           (with-exception
-            (validate-opts opts)
-            (print-describe source)))})
+            (let [{:keys [source] :as opts} (validate-opts opts)]
+              (print-describe source))))})
 
 (def create-config-command
   "CLI command to create a project configuration file"
@@ -97,9 +111,8 @@
    :options
    [src-option
     (lu/log-level-set-option)
-    ["-d" "--destination" (format "the output file"
-                                  (c/project-file-yaml))
-     :required "FILENAME"
+    ["-d" "--destination" "the output file"
+     :required "<file>"
      :default default-config-file
      :validate [#(and % (.isDirectory %)) "Not a directory"]
      :parse-fn io/file]]
@@ -114,15 +127,12 @@
    :options
    [src-option
     (lu/log-level-set-option)
-    ["-c" "--config" "location of the properties configuration file"
-     :required "FILENAME"
-     :default default-config-file
-     :parse-fn io/file]
-    ["-p" "--param" "list of project parameters (ie package:zensols.nlp,project:clj-nl-parse), see describe command"
-     :required "PARAMETERS"]]
+    (config-option)
+    ["-p" "--param" "list of project parameters (see describe command)"
+     :required "<params>"]]
    :app (fn [{:keys [config source] :as opts} & args]
-          (let [{:keys [source] :as opts} (validate-opts opts)]
-            (log/debugf "config: %s, source: %s, opts: <%s>"
-                        config source opts)
-            (with-exception
+          (with-exception
+            (let [{:keys [source] :as opts} (validate-opts opts)]
+              (log/debugf "config: %s, source: %s, opts: <%s>"
+                          config source opts)
               (make-from-properties config source opts))))})

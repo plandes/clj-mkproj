@@ -1,7 +1,8 @@
 (ns ^{:doc "Configuration template build read and creation."
       :author "Paul Landes"}
     zensols.mkproj.config
-  (:import [java.util Properties])
+  (:import [java.text SimpleDateFormat]
+           [java.util Date])
   (:require [clojure.java.io :as io]
             [clojure.tools.logging :as log]
             [clj-yaml.core :as yaml])
@@ -61,13 +62,12 @@
 
 (defn project-environment
   "Parse and create a indigestible configuration file ([[project-file-yaml]])."
-  ([src-dir]
-   (project-environment src-dir (constantly nil)))
-  ([src-dir override-fn]
+  ([src-dir & {:keys [override-fn proj]}]
    (letfn [(zip-opts [key-fn ctx]
              (zipmap (map #(-> % first key-fn) ctx)
                      (map second ctx)))]
-     (let [proj (->> (project-config src-dir) :project)
+     (let [proj (or proj (->> (project-config src-dir) :project))
+           override-fn (or override-fn (constantly nil))
            top-level-mod (->> [:template-directory]
                               (map #(option-default % override-fn (get proj %)))
                               (zip-opts identity))
@@ -83,25 +83,46 @@
                    top-level-mod)
             (validate-project-environment src-dir))))))
 
+(defn- project-context-descriptions
+  "Return a map of string key to description values for help messages."
+  [proj]
+  (->> (:context proj)
+       (map (fn [[name-key {:keys [description example]}]]
+              {(name name-key) (format "%s (ex: %s)" description example)}))
+       (apply merge)))
+
 (defn create-template-config
   "Wrte a configuration file based on a project configuration file.
 
   See [[project-file-yaml]]."
-  [src-dir out-property-file]
-  (let [comments (format "generated from source directory %s" src-dir)]
-    (with-open [writer (io/output-stream out-property-file)]
+  [src-dir out-config-result]
+  (let [comments (format "generated from source directory %s" src-dir)
+        pconfig (project-config src-dir)
+        proj (:project pconfig)
+        descs (project-context-descriptions proj)
+        create-comment (->> (SimpleDateFormat. "yyyy-MM-dd kk:mm:ss")
+                            (#(.format % (Date.)))
+                            (format "project configuration generated %s"))]
+    (with-open [writer (io/writer out-config-result)]
       (binding [*project-environment-validations*
-                #{:template-directory :template-context :context :project}]
-       (let [env (project-environment src-dir)
+                #{:template-directory :template-context :context :project}
+                *out* writer]
+       (let [env (project-environment src-dir :proj proj)
              template-directory (:template-directory env)]
-         (->> env
-              :context
-              (#(merge % {"template-directory" template-directory
-                          "source" (.getAbsolutePath src-dir)}))
-              (#(doto (java.util.Properties.)
-                  (.putAll %)
-                  (.store writer comments)))))))
-    (log/infof "wrote configuration file: %s" out-property-file)))
+         (->> (:context env)
+              (map (fn [[prop val]]
+                     (let [desc (get descs prop)]
+                       {:property (array-map :description desc
+                                             :name prop
+                                             :value val)})))
+              (array-map "description" create-comment
+                         "source" (.getAbsolutePath src-dir)
+                         "template-directory" template-directory
+                         "context")
+              (#(yaml/generate-string % :dumper-options {:flow-style :block}))
+              print))
+       (flush)))
+    (log/infof "wrote configuration file: %s" out-config-result)))
 
 (defn- create-config-template
   "Create a Velocity template from a YAML file, apply and parse it."
@@ -113,10 +134,14 @@
 (defn load-props
   "Load a properties file."
   [file-name]
-  (with-open [reader (io/reader file-name)] 
-    (let [props (java.util.Properties.)]
-      (.load props reader)
-      (into {} (for [[k v] props] [(keyword k) v])))))
+  (with-open [reader (io/reader file-name)]
+    (let [conf (yaml/parse-string reader)]
+      (->> conf :context
+           (map :property)
+           (map (fn [{:keys [name value]}]
+                  {(keyword name) value}))
+           (cons (select-keys conf [:source :template-directory]))
+           (into {})))))
 
 (defn- dir-configs
   "If **src-dir** has contains a [[project-dir-config]] file, parse it and

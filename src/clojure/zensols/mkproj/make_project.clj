@@ -144,7 +144,7 @@
   a value to use for that parameter."
   [src-dir override-fn]
   (log/infof "making project from %s" src-dir)
-  (let [env (c/project-environment src-dir override-fn)
+  (let [env (c/project-environment src-dir :override-fn override-fn)
         {template-directory :template-directory
          template-context :context} env
         {project "project"} template-context
@@ -155,8 +155,6 @@
     (.mkdirs dst-dir)
     (binding [*generate-config* (merge (dissoc env :template-context)
                                        {:template-context template-context})]
-      (let [cfg {:project env}]
-        (write-project-config cfg dst-dir))
       (process-directory (io/file src-dir c/project-file-name) dst-dir))))
 
 (defn create-mapped-override-fn

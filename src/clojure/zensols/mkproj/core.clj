@@ -4,27 +4,19 @@
   (:require [mkproj.version :as ver])
   (:gen-class :main true))
 
-(def ^:private version-info-command
-  {:description "Get the version of the application."
-   :options [["-g" "--gitref"]]
-   :app (fn [{refp :gitref} & args]
-          (println ver/version)
-          (if refp (println ver/gitref)))})
+(defn- version-info-action []
+  (println (format "%s (%s)" ver/version ver/gitref)))
 
-(def context-commands
-  '((:describe zensols.mkproj cli describe-command
-               classify classify-utterance-command)
-    (:config zensols.mkproj cli create-config-command
-             classify classify-utterance-command)
-    (:make zensols.mkproj cli make-command
-           classify classify-utterance-command)))
-
-(defn ^:private create-command-context []
-  {:command-defs context-commands
-   :single-commands {:version version-info-command}})
+(defn- create-action-context []
+  (cli/multi-action-context
+   '((:describe zensols.mkproj.cli describe-command)
+     (:config zensols.mkproj.cli create-config-command)
+     (:make zensols.mkproj.cli make-command))
+   :version-option (cli/version-option version-info-action)
+   :default-arguments ["describe"]))
 
 (defn -main [& args]
   (lu/configure "mkproj-log4j2.xml")
   (cli/set-program-name "mkroj")
-  (let [command-context (create-command-context)]
-    (apply cli/process-arguments command-context args)))
+  (-> (create-action-context)
+      (cli/process-arguments args)))
