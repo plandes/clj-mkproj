@@ -51,29 +51,29 @@ All usage commands below use
 the [example](https://github.com/plandes/template/tree/master/lein) project
 template.  For them to work, first clone the project:
 ```bash
-$ ( cd .. ; git clone https://github.com/plandes/template )
+$ mkdir ../template && wget -O - https://api.github.com/repos/plandes/template/tarball | tar zxfv - -C ../template --strip-components 1
 ```
-
-Learn what parameters need to be set and what they mean:
-```bash
-mkproj describe -s ../template/lein
-```
-See [project metadata](#project-metadata) section for more innformation.
 
 Create a configuration file:
 ```bash
 $ mkproj config -s ../template/lein
-mkproj: wrote configuration file: mkproj.properties
+mkproj: wrote configuration file: mkproj.yml
 ```
 
-Now edit the `mkproj.properties` based on what we learned in the *describe*
+Learn what parameters need to be set and what they mean:
+```bash
+$ mkproj describe
+```
+See [project metadata](#project-metadata) section for more innformation.
+
+Now edit the `mkproj.yml` based on what we learned in the *describe*
 step.  See [configuring the project](#configuring-the-project) for more
 information.
 
 Finally build out the project from the template:
 ```bash
 $ mkproj make
-mkproj: reading config file: mkproj.properties
+mkproj: reading config file: mkproj.yml
 mkproj: making project from ../template/lein
 mkproj: creating new project ../template/lein -> clj-someproject
 ...
@@ -84,27 +84,36 @@ mkproj: creating new project ../template/lein -> clj-someproject
 Get the command line usage by supplying no arguments:
 ```sql
 $ mkproj
-describe	list all project configuration parameters
-  -s, --source FILENAME  the source directory containing the make-proj.yml file
+usage: mkroj <describe|config|make> [options]
+  describe    list all project info and configuration parameters as markdown
+  -s, --source <file>                  the source directory containing the make-proj.yml file
+  -l, --level <log level>  INFO        Log level to set in the Log4J2 system.
+  -c, --config <file>      mkproj.yml  location of the project instance configuration file
 
- config	create a project configuration file (use -c with make command)
-  -s, --source FILENAME                          the source directory containing the make-proj.yml file
-  -d, --destination FILENAME  mkproj.properties  the output file
+  config      create a project configuration file (use -c with make command)
+  -s, --source <file>                   the source directory containing the make-proj.yml file
+  -l, --level <log level>   INFO        Log level to set in the Log4J2 system.
+  -d, --destination <file>  mkproj.yml  the output file
 
- make	generate a template rollout of a project
-  -s, --source FILENAME                      the source directory containing the make-proj.yml file
-  -c, --config FILENAME   mkproj.properties  location of the configuration file
-  -p, --param PARAMETERS                     list of project parameters (ie package:zensols.nlp,project:clj-nl-parse), see describe command
-
- version	Get the version of the application.
-  -g, --gitref
+  make        generate a template rollout of a project
+  -s, --source <file>                  the source directory containing the make-proj.yml file
+  -l, --level <log level>  INFO        Log level to set in the Log4J2 system.
+  -c, --config <file>      mkproj.yml  location of the project instance configuration file
+  -p, --param <params>                 list of project parameters (see describe command)
 ```
 
 
 ### Project Metadata
 
-Get information and parameters we can set, which are used to interpolate in the
-destination target file:
+There are two main YAML files:
+* **make-proj.yml** is the top level project template metadata file (see
+  the [lein example](https://github.com/plandes/template/blob/master/lein/make-proj.yml)
+* **mkproj.yml** is the *project instance* configuration file that's generated
+  from the `make-proj.yml` file
+
+To get information and parameters we can set in the *project instance*
+`mkproj.yml` file, which are used to interpolate in the destination target
+file:
 ```bash
 $ lein run describe -s ../template/lein
 Zensol Clojure Project
@@ -122,28 +131,32 @@ Simple Clojure project designed to work with [Zensol Build](https://github.com/p
   * project-description: a short project descsripion (eg This library provides generalized library to deal with natural language.), default: <WRITE ME>
 ```
 
+
 #### Configuring the Project
 
 After creating the configuraiton data in the [*config*](#usage) step modify
-each property if necessary (in most cases you'll want to).
-```properties
-#generated from source directory example
-#Thu Nov 10 23:39:36 CST 2016
-source=../../template/lein
-project-description=WRITE ME
-project-name=WRITE ME
-user=plandes
-template-directory=make-proj
-sub-group=com.zensols
-project=clj-
-package=zensols
-group=parse
-app-name=nlparser
+each property if necessary (in most cases you'll want to).  Note taht the
+description data is added for convenience during editing, but it isn't used in
+the project file creation.
+```yaml
+description: project configuration generated 2017-01-31 06:05:15
+source: /Users/landes/view/template/lein
+template-directory: make-proj
+context:
+- property:
+    description: 'github repo name (ex: clj-nl-parse)'
+    name: project
+    value: clj-
+- property:
+    description: 'very short few word project description (ex: clj-nl-parse)'
+    name: project-name
+    value: WRITE ME
+...
 ```
 
-**Imporant:** Every `mkproj.properties` should have a `project` property since
+**Imporant:** Every `mkproj.yml` should have a `project` property since
 this is the name of the top root level subdirectory to create.  For this
-reason, the `make-proj.yml` that the `mkproj.properties` is generated from
+reason, the `make-proj.yml` that the `mkproj.yml` is generated from
 *should* have a `:project` section in the `:context` as well.
 
 
@@ -152,7 +165,7 @@ reason, the `make-proj.yml` that the `mkproj.properties` is generated from
 Each template has a project metadata [YAML](http://yaml.org) configuration file
 that includes what each parameter to be interpolated/substituted in the
 resulting output.  The output of this data is
-the [project metadata](#project-metadata) `mkproj.properties` file.
+the [project metadata](#project-metadata) `mkproj.yml` file.
 
 There are two configuration `.yml` files:
 * [top level](#top-level-dsl)
