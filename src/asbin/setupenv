@@ -1,0 +1,8 @@
+#!/bin/sh
+
+JAVACMD=$(which drip)
+export JAVACMD
+
+JAVA_OPTS="-Xms=5M"
+export JAVA_OPTS
+
