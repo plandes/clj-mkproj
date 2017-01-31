@@ -1,7 +1,7 @@
 (ns zensols.mkproj.core
   (:require [zensols.actioncli.log4j2 :as lu]
             [zensols.actioncli.parse :as cli])
-  (:require [mkproj.version :as ver])
+  (:require [zensols.mkproj.version :as ver])
   (:gen-class :main true))
 
 (defn- version-info-action []
