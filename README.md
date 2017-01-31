@@ -32,6 +32,7 @@ for a complete `mkproj` template.
 
 ## Table of Contents
 
+* [Obtaining](#obtaining)
 * [Usage](#usage)
   * [Quick Start](#quick-start)
   * [Command Line](#command-line-help)
@@ -40,8 +41,15 @@ for a complete `mkproj` template.
   * [Project Metadata DSL](#project-metadata-dsl)
     * [Top Level](#top-level-dsl)
     * [Directory Level](#directory-level-dsl)
-  * [Building](#building)
-  * [Changelog](#changelog)
+* [Building](#building)
+* [Changelog](#changelog)
+
+
+## Obtaining
+
+The binaries are available are:
+- [Zip](https://github.com/plandes/clj-mkproj/releases/download/latest/clj-mkproj-0.0.5.zip)
+- [Tarball](https://github.com/plandes/clj-mkproj/releases/download/latest/clj-mkproj-0.0.5.tar.bz2)
 
 
 ## Usage
