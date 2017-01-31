@@ -6,6 +6,8 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 
 ## [Unreleased]
+- Moving to lein-git-version 1.2.7.
+- Correct Clojure dep.
 
 ## [0.0.5] - 2017-01-31
 ### Added
