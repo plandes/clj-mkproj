@@ -28,6 +28,6 @@ First major release.
 - Better logging.
 
 
-[Unreleased]: https://github.com/plandes/clj-actioncli/compare/v0.0.5...HEAD
-[0.0.5]: https://github.com/plandes/clj-actioncli/compare/v0.0.4...v0.0.5
-[0.0.4]: https://github.com/plandes/clj-actioncli/compare/v0.0.3...v0.0.4
+[Unreleased]: https://github.com/plandes/clj-mkproj/compare/v0.0.5...HEAD
+[0.0.5]: https://github.com/plandes/clj-mkproj/compare/v0.0.4...v0.0.5
+[0.0.4]: https://github.com/plandes/clj-mkproj/compare/v0.0.3...v0.0.4

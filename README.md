@@ -1,5 +1,10 @@
 # Easy to Use Project Scaffolding/Templating Tool
 
+[![Travis CI Build Status][travis-badge]][travis-link]
+
+  [travis-link]: https://travis-ci.org/plandes/clj-mkproj
+  [travis-badge]: https://travis-ci.org/plandes/clj-mkproj.svg?branch=master
+
 This application generates boilerplate projects by interpolating variables in
 files recursively starting at a top level directory recursively.  The
 application is written in Clojure, runs on the Java Virtual Machine and
@@ -36,6 +41,7 @@ for a complete `mkproj` template.
     * [Top Level](#top-level-dsl)
     * [Directory Level](#directory-level-dsl)
   * [Building](#building)
+  * [Changelog](#changelog)
 
 
 ## Usage
@@ -268,24 +274,24 @@ To build from source, do the folling:
 - Install [Leiningen](http://leiningen.org) (this is just a script)
 - Install [GNU make](https://www.gnu.org/software/make/)
 - Install [Git](https://git-scm.com)
-- Download the source:
+- Download the source: `git clone https://github.com/clj-mkproj && cd clj-mkproj`
+- Download the make include files:
 ```bash
-   git clone https://github.com/clj-mkproj
+mkdir ../clj-zenbuild && wget -O - https://api.github.com/repos/plandes/clj-zenbuild/tarball | tar zxfv - -C ../clj-zenbuild --strip-components 1
 ```
-- Build the distribution binaries:
-```bash
-   make dist
-```
+- Build the distribution binaries: `make dist`
 
-Note that you can also build a single jar file with all the dependencies with:
-```bash
-   make uber
-```
+Note that you can also build a single jar file with all the dependencies with: `make uber`
 
 
 ## Documentation
 
 API [documentation](https://plandes.github.io/clj-mkproj/codox/index.html).
+
+
+## Changelog
+
+An extensive changelog is available [here](CHANGELOG.md).
 
 
 ## License
@@ -305,4 +311,3 @@ distributed under the License is distributed on an "AS IS" BASIS,
 WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
-
