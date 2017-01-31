@@ -47,9 +47,8 @@ for a complete `mkproj` template.
 
 ## Obtaining
 
-The binaries are available are:
-- [Zip](https://github.com/plandes/clj-mkproj/releases/download/latest/clj-mkproj-0.0.5.zip)
-- [Tarball](https://github.com/plandes/clj-mkproj/releases/download/latest/clj-mkproj-0.0.5.tar.bz2)
+The latest release binaries are
+available [here](https://github.com/plandes/clj-mkproj/releases/latest).
 
 
 ## Usage
