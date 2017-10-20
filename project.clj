@@ -35,7 +35,7 @@
                  [clj-yaml "0.4.0"]
 
                  ;; command line
-                 [com.zensols.tools/actioncli "0.0.15"]]
+                 [com.zensols.tools/actioncli "0.0.21"]]
   :pom-plugins [[org.codehaus.mojo/appassembler-maven-plugin "1.6"
                  {:configuration ([:programs
                                    [:program
@@ -45,8 +45,8 @@
   :profiles {:clojure-1.8 {:dependencies [[org.clojure/clojure "1.8.0"]]}
              :uberjar {:aot [zensols.mkproj.core]}
              :appassem {:aot :all}
-             :dev
+             :test
              {:jvm-opts
-              ["-Dlog4j.configurationFile=test-resources/log4j2.xml" "-Xms4g" "-Xmx12g" "-XX:+UseConcMarkSweepGC"]
-              :dependencies [[com.zensols/clj-append "1.0.5"]]}}
+              ["-Dlog4j.configurationFile=test-resources/test-log4j2.xml"
+               "-Xms4g" "-Xmx12g" "-XX:+UseConcMarkSweepGC"]}}
   :main zensols.mkproj.core)

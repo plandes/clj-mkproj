@@ -17,6 +17,6 @@
 
 (defn -main [& args]
   (lu/configure "mkproj-log4j2.xml")
-  (cli/set-program-name "mkroj")
+  (cli/set-program-name "mkproj")
   (-> (create-action-context)
       (cli/process-arguments args)))

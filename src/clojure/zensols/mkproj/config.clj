@@ -2,7 +2,8 @@
       :author "Paul Landes"}
     zensols.mkproj.config
   (:import [java.text SimpleDateFormat]
-           [java.util Date])
+           [java.util Date]
+           [org.yaml.snakeyaml.parser ParserException])
   (:require [clojure.java.io :as io]
             [clojure.tools.logging :as log]
             [clj-yaml.core :as yaml])
@@ -33,13 +34,27 @@
            (:default def)
            (:example def))])
 
+(defn- parse-yaml [file s]
+  (try
+    (yaml/parse-string s)
+    (catch ParserException e
+      (let [mark (.getContextMark e)]
+        (-> (format "couldn't parse YAML file %s, line %s, column %s: %s"
+                    file (.getLine mark) (.getColumn mark) (.getMessage e))
+            (ex-info {:file file
+                      :mark mark})
+            throw)))))
+
 (defn project-config
   "Parse the (yaml) project template build file."
   [src-dir]
-  (with-open [reader (->> (project-file-yaml)
-                          (io/file src-dir)
-                          io/reader)]
-    (->> reader slurp yaml/parse-string)))
+  (let [file (project-file-yaml)]
+    (with-open [reader (->> file
+                            (io/file src-dir)
+                            io/reader)]
+      (->> reader
+           slurp
+           (parse-yaml file)))))
 
 (defn- validate-project-environment [src-dir project-environment]
   (log/debugf "validating environment <%s>" (pr-str project-environment))
@@ -129,13 +144,13 @@
   [template-context config-file]
   (->> (v/create-template-from-file config-file)
        (v/apply-template template-context)
-       yaml/parse-string))
+       (parse-yaml config-file)))
 
 (defn load-props
   "Load a properties file."
   [file-name]
   (with-open [reader (io/reader file-name)]
-    (let [conf (yaml/parse-string reader)]
+    (let [conf (parse-yaml file-name reader)]
       (->> conf :context
            (map :property)
            (map (fn [{:keys [name value]}]

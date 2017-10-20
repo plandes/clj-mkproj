@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<configuration sstatus="OFF" monitorInterval="5">
+    <appenders>
+        <console name="console" target="SYSTEM_OUT">
+            <patternLayout pattern="%c{1}: %m%n"/>
+        </console>
+    </appenders>
+
+    <loggers>
+        <logger name="zensols.mkproj" level="debug"/>
+        <root level="warn">
+            <appenderRef ref="console"/>
+        </root>
+    </loggers>
+</configuration>
