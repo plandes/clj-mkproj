@@ -29,20 +29,25 @@ See the
 [https://github.com/plandes/template](https://github.com/plandes/template/tree/master/lein) project
 for a complete `mkproj` template.
 
-
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 ## Table of Contents
 
-* [Obtaining](#obtaining)
-* [Usage](#usage)
-  * [Quick Start](#quick-start)
-  * [Command Line](#command-line-help)
-  * [Project Metadata](#project-metadata)
-    * [Configuration](#configuring-the-project)
-  * [Project Metadata DSL](#project-metadata-dsl)
-    * [Top Level](#top-level-dsl)
-    * [Directory Level](#directory-level-dsl)
-* [Building](#building)
-* [Changelog](#changelog)
+- [Obtaining](#obtaining)
+- [Usage](#usage)
+    - [Quick Start](#quick-start)
+    - [Command line help](#command-line-help)
+    - [Project Metadata](#project-metadata)
+        - [Configuring the Project](#configuring-the-project)
+- [Project Metadata DSL](#project-metadata-dsl)
+    - [Top Level DSL](#top-level-dsl)
+    - [Directory Level DSL](#directory-level-dsl)
+- [Building](#building)
+- [Documentation](#documentation)
+- [Changelog](#changelog)
+- [License](#license)
+
+<!-- markdown-toc end -->
+
 
 
 ## Obtaining
