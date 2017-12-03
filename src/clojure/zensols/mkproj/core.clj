@@ -13,7 +13,7 @@
      (:config zensols.mkproj.cli create-config-command)
      (:make zensols.mkproj.cli make-command))
    :version-option (cli/version-option version-info-action)
-   :default-arguments ["describe"]))
+   :default-arguments ["make"]))
 
 (defn -main [& args]
   (lu/configure "mkproj-log4j2.xml")
