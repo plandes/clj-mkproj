@@ -289,7 +289,7 @@ To build from source, do the folling:
 - Download the source: `git clone https://github.com/clj-mkproj && cd clj-mkproj`
 - Download the make include files:
 ```bash
-mkdir ../clj-zenbuild && wget -O - https://api.github.com/repos/plandes/clj-zenbuild/tarball | tar zxfv - -C ../clj-zenbuild --strip-components 1
+mkdir ../zenbuild && wget -O - https://api.github.com/repos/plandes/zenbuild/tarball | tar zxfv - -C ../zenbuild --strip-components 1
 ```
 - Build the distribution binaries: `make dist`
 
