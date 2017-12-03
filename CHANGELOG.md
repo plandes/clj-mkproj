@@ -7,6 +7,7 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.0.7] - 2017-12-03
 ### Changed
 - Moved to zenbuild.
 
@@ -41,7 +42,8 @@ First major release.
 - Better logging.
 
 
-[Unreleased]: https://github.com/plandes/clj-mkproj/compare/v0.0.6...HEAD
+[Unreleased]: https://github.com/plandes/clj-mkproj/compare/v0.0.7...HEAD
+[0.0.7]: https://github.com/plandes/clj-mkproj/compare/v0.0.6...v0.0.7
 [0.0.6]: https://github.com/plandes/clj-mkproj/compare/v0.0.5...v0.0.6
 [0.0.5]: https://github.com/plandes/clj-mkproj/compare/v0.0.4...v0.0.5
 [0.0.4]: https://github.com/plandes/clj-mkproj/compare/v0.0.3...v0.0.4
