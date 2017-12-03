@@ -5,3 +5,7 @@ PROJ_TYPE=		clojure
 PROJ_MODULES=		dist release
 
 include $(if $(ZBHOME),$(ZBHOME),../zenbuild)/main.mk
+
+.PHONY:	test
+test:
+	$(LEIN) run --argtoprintusage
