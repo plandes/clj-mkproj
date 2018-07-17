@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+- Upgrade to new zenbuild.
+- Move to MIT license.
+
+
 ## [0.0.7] - 2017-12-03
 ### Changed
 - Moved to zenbuild.
