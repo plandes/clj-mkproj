@@ -52,13 +52,14 @@
   an exclude file, and write it to the target templated
   project (**dst-file**)."
   [src-file dst-file]
-  (log/debugf "processing file: %s -> %s" src-file dst-file)
   (let [{:keys [generate]} *generate-config*
         to-match (.getPath src-file)
         exclude-tempify? (->> (:excludes generate)
                               (map #(re-find (re-pattern %) to-match))
                               (remove nil?)
                               first)
+        _ (log/debugf "processing file: %s -> %s (exclude=%s)"
+                      to-match dst-file (not (nil? exclude-tempify?)))
         dst-dir (.getParentFile dst-file)]
     (log/tracef "exclude on %s: %s" to-match exclude-tempify?)
     (if exclude-tempify?
