@@ -135,4 +135,8 @@
             (let [{:keys [source] :as opts} (validate-opts opts)]
               (log/debugf "config: %s, source: %s, opts: <%s>"
                           config source opts)
-              (make-from-properties config source opts))))})
+              (try
+                (make-from-properties config source opts)
+                (catch NullPointerException e
+                  (.printStackTrace e)
+                  (throw e))))))})
